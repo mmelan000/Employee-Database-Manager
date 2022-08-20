@@ -11,14 +11,57 @@ function placeholder(data){
     exit();
 }
 
-function viewDepartments () {
+function viewRoles () {
     if (ugly) {
-        db.query(`SELECT * FROM department`, (err, result) => {
+        console.clear();
+        db.query(`SELECT 
+                    role.title AS Title, 
+                    role.id AS ID, 
+                    department.name AS Department,
+                    role.salary AS Salary
+                    FROM role
+                    LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
             if (err) {console.log(err);}
             console.table(result);
             rootMenu();
         }) 
     } else {
+        console.clear();
+        db.query(`SELECT 
+                    role.title, 
+                    role.id, 
+                    department.name, 
+                    role.salary 
+                    FROM role
+                    LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
+            if (err) {console.log(err);}
+            console.log(`
+╔════════════════════════════════╦═════════╦═══════════════════════════════╦═════════╗
+║ Job Title#                     ║ Job ID# ║ Department Name               ║ Salary  ║
+╠════════════════════════════════╬═════════╬═══════════════════════════════╬═════════╣`);
+            
+            for (var i = 0; i < result.length; i++){
+                console.log(`║ ${result[i].title}`.padEnd(33) + `║ ${result[i].id}`.padEnd(10) + `║ ${result[i].name}`.padEnd(32) + `║ ${result[i].salary}`.padEnd(10) + `║`);
+            }
+            console.log(`╚════════════════════════════════╩═════════╩═══════════════════════════════╩═════════╝`);            
+            rootMenu();
+        })
+    }
+}
+
+function viewDepartments () {
+    if (ugly) {
+        console.clear();
+        db.query(`SELECT 
+                    department.id AS ID, 
+                    department.name AS Name 
+                    FROM department`, (err, result) => {
+            if (err) {console.log(err);}
+            console.table(result);
+            rootMenu();
+        }) 
+    } else {
+        console.clear();
         db.query(`SELECT * FROM department`, (err, result) => {
             if (err) {console.log(err);}
             console.log(`
@@ -50,7 +93,7 @@ function rootMenu() {
                     'Add a role.',
                     'Add an employee.',
                     'Update an employee.',
-                    'Turn on/off ugly mode.',
+                    'Toggle ugly mode.',
                     'Exit.'
                 ],
             }
@@ -58,10 +101,10 @@ function rootMenu() {
         .then((response) => {
             switch (response.sendTo) {
                 case 'View all departments.':
-                    viewDepartments(response);
+                    viewDepartments();
                     break;
                 case 'View all roles.':
-                    placeholder(response);
+                    viewRoles();
                     break;
                 case 'View all employees.':
                     placeholder(response);
@@ -78,7 +121,7 @@ function rootMenu() {
                 case 'Update an employee.':
                     placeholder(response);
                     break;
-                case 'Turn on/off ugly mode.':
+                case 'Toggle ugly mode.':
                     if (ugly) {ugly = false} else {ugly = true};
                     console.clear();
                     init();
@@ -92,7 +135,7 @@ function rootMenu() {
 
 function init() {
     if (ugly) {
-        console.log('Employee Manager');
+        console.log('Employee Manager... powered by console.table');
         rootMenu();
     } else {
     const unnecessary = ["",
