@@ -1,11 +1,38 @@
 const fs = require('fs/promises');
 const { exit } = require('process');
 const inquirer = require('inquirer');
-const db = require('./config/connections.js')
+const db = require('./config/connections.js');
+const cTable = require('console.table');
+const { clear } = require('console');
+let ugly = false;
 
 function placeholder(data){
-    console.log(data.sendTo);
+    console.log(data);
     exit();
+}
+
+function viewDepartments () {
+    if (ugly) {
+        db.query(`SELECT * FROM department`, (err, result) => {
+            if (err) {console.log(err);}
+            console.table(result);
+            rootMenu();
+        }) 
+    } else {
+        db.query(`SELECT * FROM department`, (err, result) => {
+            if (err) {console.log(err);}
+            console.log(`
+╔════════════════╦═══════════════════════════════╗
+║ Department ID# ║ Department Name               ║
+╠════════════════╬═══════════════════════════════╣`);
+
+            for (var i = 0; i < result.length; i++){
+                console.log(`║ ${result[i].id}`.padEnd(17) + `║ ${result[i].name}`.padEnd(32) + `║`);
+            }
+            console.log(`╚════════════════╩═══════════════════════════════╝`);
+            rootMenu();
+        })
+    }
 }
 
 function rootMenu() {
@@ -23,6 +50,7 @@ function rootMenu() {
                     'Add a role.',
                     'Add an employee.',
                     'Update an employee.',
+                    'Turn on/off ugly mode.',
                     'Exit.'
                 ],
             }
@@ -30,7 +58,7 @@ function rootMenu() {
         .then((response) => {
             switch (response.sendTo) {
                 case 'View all departments.':
-                    placeholder(response);
+                    viewDepartments(response);
                     break;
                 case 'View all roles.':
                     placeholder(response);
@@ -50,6 +78,11 @@ function rootMenu() {
                 case 'Update an employee.':
                     placeholder(response);
                     break;
+                case 'Turn on/off ugly mode.':
+                    if (ugly) {ugly = false} else {ugly = true};
+                    console.clear();
+                    init();
+                    break;
                 case 'Exit.':
                     exit();
 
@@ -58,6 +91,10 @@ function rootMenu() {
 }
 
 function init() {
+    if (ugly) {
+        console.log('Employee Manager');
+        rootMenu();
+    } else {
     const unnecessary = ["",
         "    _/_/_/_/                            _/                                              _/      _/                                                              ",
         "   _/        _/_/_/  _/_/    _/_/_/    _/    _/_/    _/    _/    _/_/      _/_/        _/_/  _/_/    _/_/_/  _/_/_/      _/_/_/    _/_/_/    _/_/    _/  _/_/   ",
@@ -77,6 +114,7 @@ function init() {
             rootMenu();
         }
     }, 200);
+    }
 }
 
 init();
