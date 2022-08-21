@@ -11,14 +11,65 @@ function placeholder(data){
     exit();
 }
 
-function viewRoles () {
+function viewEmployees() {
     if (ugly) {
         console.clear();
         db.query(`SELECT 
-                    role.title AS Title, 
-                    role.id AS ID, 
-                    department.name AS Department,
-                    role.salary AS Salary
+                    e.id as 'ID#',
+                    e.first_name AS 'First Name',
+                    e.last_name AS 'Last Name',
+                    role.title AS 'Role',
+                    department.name AS 'Department',
+                    role.salary AS 'Salary',
+                    CONCAT (m.first_name, ' ', m.last_name) AS 'Manager'
+                    FROM employee e
+                    LEFT JOIN role ON e.role_id = role.id 
+                    LEFT JOIN department ON role.department_id = department.id
+                    LEFT JOIN employee m ON m.id = e.manager_id;`, 
+            (err, result) => {
+                if (err) {console.log(err);}
+                console.table(result);
+                rootMenu();
+            }
+        ) 
+    } else {
+        console.clear();
+        db.query(`SELECT 
+                    e.id,
+                    e.first_name,
+                    e.last_name,
+                    role.title,
+                    department.name,
+                    role.salary,
+                    CONCAT (m.first_name, ' ', m.last_name) as manager
+                    FROM employee e
+                    LEFT JOIN role ON e.role_id = role.id 
+                    LEFT JOIN department ON role.department_id = department.id
+                    LEFT JOIN employee m ON m.id = e.manager_id;`, 
+                (err, result) => {
+                    if (err) {console.log(err);}
+                    console.log(`
+╔═════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦═════════╦═══════════════════════════════════════════════════════════════╗
+║ ID# ║ First Name                     ║ Last Name                      ║ Job Title                      ║ Department                     ║ Salary  ║ Manager                                                       ║
+╠═════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬═════════╬═══════════════════════════════════════════════════════════════╣`);
+            
+            for (var i = 0; i < result.length; i++){
+                console.log(`║ ${result[i].id}`.padEnd(6) + `║ ${result[i].first_name}`.padEnd(33) + `║ ${result[i].last_name}`.padEnd(33) + `║ ${result[i].title}`.padEnd(33) + `║ ${result[i].name}`.padEnd(33) + `║ ${result[i].salary}`.padEnd(10) + `║ ${result[i].manager}`.padEnd(64) + `║`);
+            }
+            console.log(`╚═════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩═════════╩═══════════════════════════════════════════════════════════════╝`);       
+            rootMenu();
+        })
+    }
+}
+
+function viewRoles() {
+    if (ugly) {
+        console.clear();
+        db.query(`SELECT 
+                    role.title AS 'Job Title', 
+                    role.id AS 'ID#', 
+                    department.name AS 'Department',
+                    role.salary AS 'Salary'
                     FROM role
                     LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
             if (err) {console.log(err);}
@@ -36,25 +87,25 @@ function viewRoles () {
                     LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
             if (err) {console.log(err);}
             console.log(`
-╔════════════════════════════════╦═════════╦═══════════════════════════════╦═════════╗
-║ Job Title#                     ║ Job ID# ║ Department Name               ║ Salary  ║
-╠════════════════════════════════╬═════════╬═══════════════════════════════╬═════════╣`);
+╔════════════════════════════════╦═════╦════════════════════════════════╦═════════╗
+║ Job Title#                     ║ ID# ║ Department                     ║ Salary  ║
+╠════════════════════════════════╬═════╬════════════════════════════════╬═════════╣`);
             
             for (var i = 0; i < result.length; i++){
-                console.log(`║ ${result[i].title}`.padEnd(33) + `║ ${result[i].id}`.padEnd(10) + `║ ${result[i].name}`.padEnd(32) + `║ ${result[i].salary}`.padEnd(10) + `║`);
+                console.log(`║ ${result[i].title}`.padEnd(33) + `║ ${result[i].id}`.padEnd(6) + `║ ${result[i].name}`.padEnd(33) + `║ ${result[i].salary}`.padEnd(10) + `║`);
             }
-            console.log(`╚════════════════════════════════╩═════════╩═══════════════════════════════╩═════════╝`);            
+            console.log(`╚════════════════════════════════╩═════╩════════════════════════════════╩═════════╝`);            
             rootMenu();
         })
     }
 }
 
-function viewDepartments () {
+function viewDepartments() {
     if (ugly) {
         console.clear();
         db.query(`SELECT 
-                    department.id AS ID, 
-                    department.name AS Name 
+                    department.id AS 'ID#', 
+                    department.name AS 'Department'
                     FROM department`, (err, result) => {
             if (err) {console.log(err);}
             console.table(result);
@@ -65,14 +116,14 @@ function viewDepartments () {
         db.query(`SELECT * FROM department`, (err, result) => {
             if (err) {console.log(err);}
             console.log(`
-╔════════════════╦═══════════════════════════════╗
-║ Department ID# ║ Department Name               ║
-╠════════════════╬═══════════════════════════════╣`);
+╔═════╦════════════════════════════════╗
+║ ID# ║ Department                     ║
+╠═════╬════════════════════════════════╣`);
 
             for (var i = 0; i < result.length; i++){
-                console.log(`║ ${result[i].id}`.padEnd(17) + `║ ${result[i].name}`.padEnd(32) + `║`);
+                console.log(`║ ${result[i].id}`.padEnd(6) + `║ ${result[i].name}`.padEnd(33) + `║`);
             }
-            console.log(`╚════════════════╩═══════════════════════════════╝`);
+            console.log(`╚═════╩════════════════════════════════╝`);
             rootMenu();
         })
     }
@@ -107,7 +158,7 @@ function rootMenu() {
                     viewRoles();
                     break;
                 case 'View all employees.':
-                    placeholder(response);
+                    viewEmployees();
                     break;
                 case 'Add a department.':
                     placeholder(response);
