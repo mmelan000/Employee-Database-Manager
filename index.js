@@ -4,11 +4,38 @@ const inquirer = require('inquirer');
 const db = require('./config/connections.js');
 const cTable = require('console.table');
 const { clear } = require('console');
+const console = require('console');
 let ugly = false;
 
 function placeholder(data){
     console.log(data);
     exit();
+}
+
+function addDepartment() {
+    inquirer
+    .prompt(
+        {
+            type: 'input',
+            name: 'name',
+            message: "Please enter the name of the Department:",
+            validate(value) {
+                if (value.length > 30) {
+                    return 'Must be under 30 characters';
+                } else if (!value){
+                    return 'Please enter a name.'
+                } else {
+                    return true;
+                }
+            }
+        }
+    )
+    .then((response) => {
+        db.query(`INSERT INTO department (name) VALUE (?)`, response.name, function (err, result) {
+            if (err) {console.log(err);}
+            viewDepartments();
+        })
+    });
 }
 
 function viewEmployees() {
@@ -161,7 +188,7 @@ function rootMenu() {
                     viewEmployees();
                     break;
                 case 'Add a department.':
-                    placeholder(response);
+                    addDepartment();
                     break;
                 case 'Add a role.':
                     placeholder(response);
