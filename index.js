@@ -9,7 +9,7 @@ let ugly = false;
 function renderEmployeeTable(sortBy, ascDesc) {
     console.log(sortBy);
     console.log(ascDesc);
-    if (!sortBy) {sortBy = 'e.id'};
+    if (!sortBy) {sortBy = 'e.id'; ascDesc = `ASC`};
     if (ugly) {
         console.clear();
         db.query(`SELECT 
@@ -98,7 +98,7 @@ function updateEmployeeManager() {
                     .then((response) => {
                         db.query(`UPDATE employee SET manager_id = ? WHERE id = ?`, [response.manager, selectedEmployee.employee], function (err, result) {
                             if (err) {console.log(err);}
-                            viewEmployees();
+                            renderEmployeeTable();
                             return;
                         })
                     });
@@ -143,7 +143,7 @@ function updateEmployeeRole() {
                 .then((response) => {
                     db.query(`UPDATE employee SET role_id = ? WHERE id = ?`, [response.role, response.employee], function (err, result) {
                         if (err) {console.log(err);}
-                        viewEmployees();
+                        renderEmployeeTable();
                         return;
                     })
                 });
@@ -215,7 +215,7 @@ function addEmployee() {
                 .then((response) => {
                     db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`, [response.firstName, response.lastName, response.role, response.manager], function (err, result) {
                         if (err) {console.log(err);}
-                        viewEmployees();
+                        renderEmployeeTable();
                         return;
                     })
                 });
