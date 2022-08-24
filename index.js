@@ -6,6 +6,64 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
+function renderEmployeeTable(sortBy, ascDesc) {
+    console.log(sortBy);
+    console.log(ascDesc);
+    if (!sortBy) {sortBy = 'e.id'};
+    if (ugly) {
+        console.clear();
+        db.query(`SELECT 
+                    e.id as 'ID#',
+                    e.first_name AS 'First Name',
+                    e.last_name AS 'Last Name',
+                    role.title AS 'Role',
+                    department.name AS 'Department',
+                    role.salary AS 'Salary',
+                    CONCAT (m.first_name, ' ', m.last_name) AS 'Manager'
+                FROM employee e
+                LEFT JOIN role ON e.role_id = role.id 
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee m ON m.id = e.manager_id
+                ORDER BY ${sortBy} ${ascDesc}`,
+            (err, result) => {
+                if (err) { console.log(err); }
+                console.table(result);
+                rootMenu();
+                return;
+            }
+        )
+    } else {
+        console.clear();
+        db.query(`SELECT 
+                    e.id,
+                    e.first_name,
+                    e.last_name,
+                    role.title,
+                    department.name,
+                    role.salary,
+                    CONCAT (m.first_name, ' ', m.last_name) as manager
+                FROM employee e
+                LEFT JOIN role ON e.role_id = role.id 
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee m ON m.id = e.manager_id
+                ORDER BY ${sortBy} ${ascDesc}`,
+            (err, result) => {
+                if (err) { console.log(err); }
+                console.log(`
+╔═════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦═════════╦═══════════════════════════════════════════════════════════════╗
+║ ID# ║ First Name                     ║ Last Name                      ║ Job Title                      ║ Department                     ║ Salary  ║ Manager                                                       ║
+╠═════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬═════════╬═══════════════════════════════════════════════════════════════╣`);
+
+                for (var i = 0; i < result.length; i++) {
+                    console.log(`║ ${result[i].id}`.padEnd(6) + `║ ${result[i].first_name}`.padEnd(33) + `║ ${result[i].last_name}`.padEnd(33) + `║ ${result[i].title}`.padEnd(33) + `║ ${result[i].name}`.padEnd(33) + `║ ${result[i].salary}`.padEnd(10) + `║ ${result[i].manager}`.padEnd(64) + `║`);
+                }
+                console.log(`╚═════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩═════════╩═══════════════════════════════════════════════════════════════╝`);
+                rootMenu();
+                return;
+            })
+    }
+}
+
 function updateEmployeeManager() {
     console.clear();
     db.promise().query(`SELECT 
@@ -27,7 +85,7 @@ function updateEmployeeManager() {
 
                 employeeQuery[0].splice(findEmployeeIndex, 1);
                 employeeQuery[0].push({ name: 'No Manager', value: null, short: null });
-                
+
                 inquirer
                     .prompt(
                         {
@@ -253,56 +311,50 @@ function addDepartment() {
 }
 
 function viewEmployees() {
-    if (ugly) {
-        console.clear();
-        db.query(`SELECT 
-                    e.id as 'ID#',
-                    e.first_name AS 'First Name',
-                    e.last_name AS 'Last Name',
-                    role.title AS 'Role',
-                    department.name AS 'Department',
-                    role.salary AS 'Salary',
-                    CONCAT (m.first_name, ' ', m.last_name) AS 'Manager'
-                FROM employee e
-                LEFT JOIN role ON e.role_id = role.id 
-                LEFT JOIN department ON role.department_id = department.id
-                LEFT JOIN employee m ON m.id = e.manager_id;`,
-            (err, result) => {
-                if (err) { console.log(err); }
-                console.table(result);
-                rootMenu();
-                return;
+    inquirer
+        .prompt([
+            {
+                type: `list`,
+                name: `viewBy`,
+                message: `Sort By?`,
+                choices: [
+                    `ID`,
+                    `First Name`,
+                    `Last Name`,
+                    `Job Title`,
+                    `Department`,
+                    `Salary`,
+                    `Manager`
+                ],
             }
-        )
-    } else {
-        console.clear();
-        db.query(`SELECT 
-                    e.id,
-                    e.first_name,
-                    e.last_name,
-                    role.title,
-                    department.name,
-                    role.salary,
-                    CONCAT (m.first_name, ' ', m.last_name) as manager
-                FROM employee e
-                LEFT JOIN role ON e.role_id = role.id 
-                LEFT JOIN department ON role.department_id = department.id
-                LEFT JOIN employee m ON m.id = e.manager_id;`,
-            (err, result) => {
-                if (err) { console.log(err); }
-                console.log(`
-╔═════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦════════════════════════════════╦═════════╦═══════════════════════════════════════════════════════════════╗
-║ ID# ║ First Name                     ║ Last Name                      ║ Job Title                      ║ Department                     ║ Salary  ║ Manager                                                       ║
-╠═════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬════════════════════════════════╬═════════╬═══════════════════════════════════════════════════════════════╣`);
+        ])
+        .then((response) => {
+            switch (response.viewBy) {
+                case `ID`:
+                    renderEmployeeTable(`e.id`, `ASC`);
+                    break;
+                case `First Name`:
+                    renderEmployeeTable(`e.first_name`, `ASC`);
+                    break;
+                case `Last Name`:
+                    renderEmployeeTable(`e.last_name`, `ASC`);
+                    break;
+                case `Job Title`:
+                    renderEmployeeTable(`e.role_id`, `ASC`);
+                    break;
+                case `Department`:
+                    renderEmployeeTable(`department.name`, `ASC`);
+                    break;
+                case `Salary`:
+                    renderEmployeeTable(`role.salary`, `DESC`);
+                    break;
+                case `Manager`:
+                    renderEmployeeTable(`m.first_name`, `ASC`);
+                    break;
+            }
+        })
 
-                for (var i = 0; i < result.length; i++) {
-                    console.log(`║ ${result[i].id}`.padEnd(6) + `║ ${result[i].first_name}`.padEnd(33) + `║ ${result[i].last_name}`.padEnd(33) + `║ ${result[i].title}`.padEnd(33) + `║ ${result[i].name}`.padEnd(33) + `║ ${result[i].salary}`.padEnd(10) + `║ ${result[i].manager}`.padEnd(64) + `║`);
-                }
-                console.log(`╚═════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩════════════════════════════════╩═════════╩═══════════════════════════════════════════════════════════════╝`);
-                rootMenu();
-                return;
-            })
-    }
+
 }
 
 function viewRoles() {

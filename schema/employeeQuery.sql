@@ -9,4 +9,5 @@ SELECT
 FROM employee e
 LEFT JOIN role ON e.role_id = role.id 
 LEFT JOIN department ON role.department_id = department.id
-LEFT JOIN employee m ON m.id = e.manager_id;
+LEFT JOIN employee m ON m.id = e.manager_id
+ORDER BY m.first_name ASC;
