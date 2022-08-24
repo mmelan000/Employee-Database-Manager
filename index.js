@@ -6,6 +6,97 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
+function deleteEmployee() {
+    console.clear();
+    db.promise().query(`SELECT 
+                CONCAT (employee.first_name, ' ', employee.last_name) AS 'name',               
+                employee.id AS 'value', 
+                employee.id AS 'short'
+                FROM employee`)
+    .then((employee) =>{
+        employee[0].push({ name: 'Cancel', value: null, short: null });
+        inquirer
+            .prompt(
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: "Please select which Employee you wish to delete:",
+                    choices: employee[0]
+                }
+            )
+            .then((response) => {
+                db.query(`DELETE FROM employee WHERE employee.id = ?`, [response.employee], function (err, result) {
+                    if (err) { console.log(err); }
+                    renderEmployeeTable();
+                    return;
+                })
+            return;
+            });
+    return;
+    })
+return;
+}
+
+function deleteRole() {
+    console.clear();
+    db.promise().query(`SELECT 
+                role.title AS 'name',               
+                role.id AS 'value', 
+                role.id AS 'short'
+                FROM role`)
+    .then((role) =>{
+        role[0].push({ name: 'Cancel', value: null, short: null });
+        inquirer
+            .prompt(
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: "Please select which Role you wish to delete:",
+                    choices: role[0]
+                }
+            )
+            .then((response) => {
+                db.query(`DELETE FROM role WHERE role.id = ?`, [response.role], function (err, result) {
+                    if (err) { console.log(err); }
+                    viewRoles();
+                    return;
+                })
+            });
+        return;
+    })
+    return;
+}
+
+function deleteDepartment() {
+    console.clear();
+    db.promise().query(`SELECT 
+                department.name AS 'name',                
+                department.id AS 'value', 
+                department.id AS 'short'
+                FROM department`)
+    .then((department) =>{
+        department[0].push({ name: 'Cancel', value: null, short: null });
+        inquirer
+            .prompt(
+                {
+                    type: 'list',
+                    name: 'department',
+                    message: "Please select which Department you wish to delete:",
+                    choices: department[0]
+                }
+            )
+            .then((response) => {
+                db.query(`DELETE FROM department WHERE department.id = ?`, [response.department], function (err, result) {
+                    if (err) { console.log(err); }
+                    viewDepartments();
+                    return;
+                })
+            });
+        return;
+    })
+    return;
+}
+
 function renderEmployeeTable(sortBy, ascDesc) {
     console.log(sortBy);
     console.log(ascDesc);
@@ -456,6 +547,9 @@ function rootMenu() {
                     `Add an employee.`,
                     `Update an employee's role.`,
                     `Update an employee's manager.`,
+                    `Delete a department.`,
+                    `Delete an employee.`,
+                    `Delete a role.`,
                     `Toggle table mode.`,
                     `Exit.`
                 ],
@@ -486,6 +580,15 @@ function rootMenu() {
                     break;
                 case `Update an employee's manager.`:
                     updateEmployeeManager();
+                    break;
+                case `Delete a department.`:
+                    deleteDepartment();
+                    break;
+                case `Delete an employee.`:
+                    deleteEmployee();
+                    break;
+                case `Delete a role.`:
+                    deleteRole();
                     break;
                 case `Toggle table mode.`:
                     toggleTables();
