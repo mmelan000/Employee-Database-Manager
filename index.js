@@ -6,18 +6,91 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
-function placeholder(data) {
+function exitApp(data) {
     console.log(data);
     exit();
 }
 
-// db.promise().query('SELECT department.name as name, department.id as value, department.id as short from department')
-//     .then((data) => console.log(data[0]))
+function addEmployee() {
+    console.clear();
+    db.promise().query(`SELECT 
+                            CONCAT (employee.first_name, ' ', employee.last_name) AS name,
+                            employee.id AS value,
+                            employee.id AS short
+                        FROM employee`)
+    .then((managerQuery) => {
+        managerQuery[0].push({ name: 'No Manager', value: null, short: null });
+        db.promise().query(`SELECT 
+                                role.title as name, 
+                                role.id as value, 
+                                role.id as short 
+                            FROM role`)
+        .then((roleQuery) => {
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        name: 'firstName',
+                        message: "Please enter the first name of the employee:",
+                        validate(value) {
+                            if (value.length > 30) {
+                                return 'Must be under 30 characters';
+                            } else if (!value) {
+                                return 'Please enter a name.'
+                                } else {
+                                    return true;
+                                }
+                        }
+                    },
+                    {
+                        type: 'input',
+                        name: 'lastName',
+                        message: "Please enter the last name of the employee:",
+                        validate(value) {
+                            if (value.length > 30) {
+                                return 'Must be under 30 characters';
+                            } else if (!value) {
+                                return 'Please enter a name.'
+                            } else {
+                                return true;
+                            }
+                        }
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'Which role will this employee be filling?',
+                        choices: roleQuery[0]
+                    },
+                    {
+                        type: 'list',
+                        name: 'manager',
+                        message: 'Who will they be reporting to?',
+                        choices: managerQuery[0]
+                    }
+                ])
+                .then((response) => {
+                    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`, [response.firstName, response.lastName, response.role, response.manager], function (err, result) {
+                        if (err) {console.log(err);}
+                        viewEmployees();
+                        return;
+                    })
+                });
+            return;
+        })
+        return;
+    })
+    return;
+}
 
 function addRole() {
     console.clear();
-    db.promise().query('SELECT department.name as name, department.id as value, department.id as short from department')
-        .then((data) => {
+    db.promise().query(`SELECT 
+                            department.name as name, 
+                            department.id as value, 
+                            department.id as short 
+                        FROM department`)
+        .then((departmentQuery) => {
             inquirer
                 .prompt([
                     {
@@ -52,11 +125,10 @@ function addRole() {
                         type: 'list',
                         name: 'department',
                         message: 'Which department does this role belong to?',
-                        choices: data[0]
+                        choices: departmentQuery[0]
                     }
                 ])
                 .then((response) => {
-                    console.log(response);
                     db.query(`INSERT INTO role (title, salary, department_id) VALUES (?,?,?)`, [response.title, parseInt(response.salary), response.department], function (err, result) {
                         if (err) { console.log(err); }
                         viewRoles();
@@ -106,10 +178,10 @@ function viewEmployees() {
                     department.name AS 'Department',
                     role.salary AS 'Salary',
                     CONCAT (m.first_name, ' ', m.last_name) AS 'Manager'
-                    FROM employee e
-                    LEFT JOIN role ON e.role_id = role.id 
-                    LEFT JOIN department ON role.department_id = department.id
-                    LEFT JOIN employee m ON m.id = e.manager_id;`,
+                FROM employee e
+                LEFT JOIN role ON e.role_id = role.id 
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee m ON m.id = e.manager_id;`,
             (err, result) => {
                 if (err) { console.log(err); }
                 console.table(result);
@@ -127,10 +199,10 @@ function viewEmployees() {
                     department.name,
                     role.salary,
                     CONCAT (m.first_name, ' ', m.last_name) as manager
-                    FROM employee e
-                    LEFT JOIN role ON e.role_id = role.id 
-                    LEFT JOIN department ON role.department_id = department.id
-                    LEFT JOIN employee m ON m.id = e.manager_id;`,
+                FROM employee e
+                LEFT JOIN role ON e.role_id = role.id 
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee m ON m.id = e.manager_id;`,
             (err, result) => {
                 if (err) { console.log(err); }
                 console.log(`
@@ -156,8 +228,8 @@ function viewRoles() {
                     role.id AS 'ID#', 
                     department.name AS 'Department',
                     role.salary AS 'Salary'
-                    FROM role
-                    LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
+                FROM role
+                LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
             if (err) { console.log(err); }
             console.table(result);
             rootMenu();
@@ -170,8 +242,8 @@ function viewRoles() {
                     role.id, 
                     department.name, 
                     role.salary 
-                    FROM role
-                    LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
+                FROM role
+                LEFT JOIN department ON role.department_id = department.id`, (err, result) => {
             if (err) { console.log(err); }
             console.log(`
 ╔════════════════════════════════╦═════╦════════════════════════════════╦═════════╗
@@ -194,7 +266,7 @@ function viewDepartments() {
         db.query(`SELECT 
                     department.id AS 'ID#', 
                     department.name AS 'Department'
-                    FROM department`, (err, result) => {
+                FROM department`, (err, result) => {
             if (err) { console.log(err); }
             console.table(result);
             rootMenu();
@@ -257,23 +329,23 @@ function rootMenu() {
                     addRole(response);
                     break;
                 case 'Add an employee.':
-                    placeholder(response);
+                    addEmployee(response);
                     break;
                 case 'Update an employee.':
-                    placeholder(response);
+                    exitApp(response);
                     break;
                 case 'Toggle ugly mode.':
                     if (ugly) { ugly = false } else { ugly = true };
-                    console.clear();
                     init();
                     break;
                 case 'Exit.':
-                    exit();
+                    exitApp(response);
             }
         })
 }
 
 function init() {
+    console.clear();
     if (ugly) {
         console.log('Employee Manager... powered by console.table');
         rootMenu();

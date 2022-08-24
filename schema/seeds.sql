@@ -26,3 +26,5 @@ VALUES ("John", "Doe", 7, null),
        ("Sarah", "Lourd", 5, null),
        ("Tom", "Allen", 3, 7),
        ("012345678901234567890123456789", "012345678901234567890123456789", 9, 9);
+
+SELECT manager_id from employee WHERE manager_id IS NOT NULL;
