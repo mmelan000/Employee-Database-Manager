@@ -6,9 +6,49 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
-function exitApp(data) {
-    console.log(data);
-    exit();
+function updateEmployeeRole() {
+    console.clear();
+    db.promise().query(`SELECT 
+                            CONCAT (employee.first_name, ' ', employee.last_name) AS name,
+                            employee.id AS value,
+                            employee.id AS short
+                        FROM employee`)
+    .then((employeeQuery) => {
+        console.log('line17');
+        db.promise().query(`SELECT 
+                                role.title as name, 
+                                role.id as value, 
+                                role.id as short 
+                            FROM role`)
+        .then((roleQuery) => {
+            console.log('line24');
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        name: 'employee',
+                        message: 'Which employee would you like to update?',
+                        choices: employeeQuery[0]
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'What role will they be moving to?',
+                        choices: roleQuery[0]
+                    }
+                ])
+                .then((response) => {
+                    db.query(`UPDATE employee SET role_id = ? WHERE id = ?`, [response.role, response.employee], function (err, result) {
+                        if (err) {console.log(err);}
+                        viewEmployees();
+                        return;
+                    })
+                });
+            return;
+        })
+        return;
+    })
+    return;
 }
 
 function addEmployee() {
@@ -291,87 +331,93 @@ function viewDepartments() {
     }
 }
 
+function toggleTables() {
+    if (ugly) {
+        ugly = false;
+        console.log(`Pretty tables enables.`);
+    } else {
+        ugly = true;
+        console.log(`Simple tables enabled.`);
+    }
+    rootMenu();
+    return;
+}
+
 function rootMenu() {
     inquirer
         .prompt([
             {
-                type: 'list',
-                name: 'sendTo',
-                message: 'What would you like to do?',
+                type: `list`,
+                name: `sendTo`,
+                message: `What would you like to do?`,
                 choices: [
-                    'View all departments.',
-                    'View all roles.',
-                    'View all employees.',
-                    'Add a department.',
-                    'Add a role.',
-                    'Add an employee.',
-                    'Update an employee.',
-                    'Toggle ugly mode.',
-                    'Exit.'
+                    `View all departments.`,
+                    `View all roles.`,
+                    `View all employees.`,
+                    `Add a department.`,
+                    `Add a role.`,
+                    `Add an employee.`,
+                    `Update an employee's role.`,
+                    `Toggle table mode.`,
+                    `Exit.`
                 ],
             }
         ])
         .then((response) => {
             switch (response.sendTo) {
-                case 'View all departments.':
+                case `View all departments.`:
                     viewDepartments();
                     break;
-                case 'View all roles.':
+                case `View all roles.`:
                     viewRoles();
                     break;
-                case 'View all employees.':
+                case `View all employees.`:
                     viewEmployees();
                     break;
-                case 'Add a department.':
+                case `Add a department.`:
                     addDepartment();
                     break;
-                case 'Add a role.':
-                    addRole(response);
+                case `Add a role.`:
+                    addRole();
                     break;
-                case 'Add an employee.':
-                    addEmployee(response);
+                case `Add an employee.`:
+                    addEmployee();
                     break;
-                case 'Update an employee.':
-                    exitApp(response);
+                case `Update an employee's role.`:
+                    updateEmployeeRole();
                     break;
-                case 'Toggle ugly mode.':
-                    if (ugly) { ugly = false } else { ugly = true };
-                    init();
+                case `Toggle table mode.`:
+                    toggleTables();
                     break;
-                case 'Exit.':
-                    exitApp(response);
+                case `Exit.`:
+                    exit();
             }
         })
 }
 
 function init() {
     console.clear();
-    if (ugly) {
-        console.log('Employee Manager... powered by console.table');
-        rootMenu();
-        return;
-    } else {
-        const unnecessary = ["",
-            "    _/_/_/_/                            _/                                              _/      _/                                                              ",
-            "   _/        _/_/_/  _/_/    _/_/_/    _/    _/_/    _/    _/    _/_/      _/_/        _/_/  _/_/    _/_/_/  _/_/_/      _/_/_/    _/_/_/    _/_/    _/  _/_/   ",
-            "  _/_/_/    _/    _/    _/  _/    _/  _/  _/    _/  _/    _/  _/_/_/_/  _/_/_/_/      _/  _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/_/_/_/  _/_/        ",
-            " _/        _/    _/    _/  _/    _/  _/  _/    _/  _/    _/  _/        _/            _/      _/  _/    _/  _/    _/  _/    _/  _/    _/  _/        _/           ",
-            "_/_/_/_/  _/    _/    _/  _/_/_/    _/    _/_/      _/_/_/    _/_/_/    _/_/_/      _/      _/    _/_/_/  _/    _/    _/_/_/    _/_/_/    _/_/_/  _/            ",
-            "                         _/                            _/                                                                          _/                           ",
-            "                        _/                        _/_/                                                                        _/_/                              ",
-            ""
-        ];
-        let counter = 0;
-        const i = setInterval(function () {
-            console.log(unnecessary[counter]);
-            counter++;
-            if (counter === unnecessary.length) {
-                clearInterval(i);
-                rootMenu();
-                return;
-            }
-        }, 200);
-    }
+    const unnecessary = ["",
+        "    _/_/_/_/                            _/                                              _/      _/                                                              ",
+        "   _/        _/_/_/  _/_/    _/_/_/    _/    _/_/    _/    _/    _/_/      _/_/        _/_/  _/_/    _/_/_/  _/_/_/      _/_/_/    _/_/_/    _/_/    _/  _/_/   ",
+        "  _/_/_/    _/    _/    _/  _/    _/  _/  _/    _/  _/    _/  _/_/_/_/  _/_/_/_/      _/  _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/_/_/_/  _/_/        ",
+        " _/        _/    _/    _/  _/    _/  _/  _/    _/  _/    _/  _/        _/            _/      _/  _/    _/  _/    _/  _/    _/  _/    _/  _/        _/           ",
+        "_/_/_/_/  _/    _/    _/  _/_/_/    _/    _/_/      _/_/_/    _/_/_/    _/_/_/      _/      _/    _/_/_/  _/    _/    _/_/_/    _/_/_/    _/_/_/  _/            ",
+        "                         _/                            _/                                                                          _/                           ",
+        "                        _/                        _/_/                                                                        _/_/                              ",
+        ""
+    ];
+    let counter = 0;
+    const i = setInterval(function () {
+        console.log(unnecessary[counter]);
+        counter++;
+        if (counter === unnecessary.length) {
+            clearInterval(i);
+            rootMenu();
+            return;
+        }
+    }, 200);
 }
+
 
 init();
