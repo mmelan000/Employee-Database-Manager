@@ -40,7 +40,7 @@ THEN I am prompted to enter the employee’s first name, last name, role, and ma
 THEN I am prompted to select an employee to update and their new role and this information is updated in the database~~
 
 
-Application allows users to update employee managers (2 points).
+~~Application allows users to update employee managers (2 points).~~
 
 Application allows users to view employees by manager (2 points).
 

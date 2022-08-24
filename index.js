@@ -6,6 +6,51 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
+function updateEmployeeManager() {
+    console.clear();
+    db.promise().query(`SELECT 
+                            CONCAT (employee.first_name, ' ', employee.last_name) AS name,
+                            employee.id AS value,
+                            employee.id AS short
+                        FROM employee`)
+    .then((employeeQuery) => {
+        inquirer
+            .prompt(
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Which employee would you like to update?',
+                    choices: employeeQuery[0]
+                })
+            .then((selectedEmployee) => {
+                const findEmployeeIndex = employeeQuery[0].findIndex(object => object.short === selectedEmployee.employee);
+
+                employeeQuery[0].splice(findEmployeeIndex, 1);
+                employeeQuery[0].push({ name: 'No Manager', value: null, short: null });
+                
+                inquirer
+                    .prompt(
+                        {
+                            type: 'list',
+                            name: 'manager',
+                            message: 'Who will they be reporting to?',
+                            choices: employeeQuery[0]
+                        }
+                    )
+                    .then((response) => {
+                        db.query(`UPDATE employee SET manager_id = ? WHERE id = ?`, [response.manager, selectedEmployee.employee], function (err, result) {
+                            if (err) {console.log(err);}
+                            viewEmployees();
+                            return;
+                        })
+                    });
+                return;
+            })
+        return;
+    })
+    return;
+}
+
 function updateEmployeeRole() {
     console.clear();
     db.promise().query(`SELECT 
@@ -358,6 +403,7 @@ function rootMenu() {
                     `Add a role.`,
                     `Add an employee.`,
                     `Update an employee's role.`,
+                    `Update an employee's manager.`,
                     `Toggle table mode.`,
                     `Exit.`
                 ],
@@ -385,6 +431,9 @@ function rootMenu() {
                     break;
                 case `Update an employee's role.`:
                     updateEmployeeRole();
+                    break;
+                case `Update an employee's manager.`:
+                    updateEmployeeManager();
                     break;
                 case `Toggle table mode.`:
                     toggleTables();
@@ -418,6 +467,5 @@ function init() {
         }
     }, 200);
 }
-
 
 init();
