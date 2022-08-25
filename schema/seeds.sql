@@ -22,7 +22,4 @@ VALUES ("John", "Doe", 7, null),
        ("Kunal", "Singh", 1, null),
        ("Malia", "Brown", 2, 5),
        ("Sarah", "Lourd", 5, null),
-       ("QKunal", "Singh", 3, null),
-       ("WMalia", "Brown", 3, 5),
-       ("ASarah", "Lourd", 7, null),
        ("Tom", "Allen", 3, 7);

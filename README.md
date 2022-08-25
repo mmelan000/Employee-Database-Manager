@@ -3,7 +3,7 @@
 
 ## Description  
 
-The purpose of this is to allow a manager to enter their information as well as their employees, which will then be compiled into a viewable html dashboard.
+The purpose of this is to create a program which allows employers to create an easy to use database to track internal data about its employees.
 
 **User Story**
 ```
@@ -36,38 +36,33 @@ THEN I am prompted to select an employee to update and their new role and this i
 ## Table of Contents  
 1. [Description](#description)  
 2. [Installation](#installation)  
-3. [Dependencies](#dependencies)
-4. [Usage](#usage)  
-5. [Questions](#questions)  
-6. [Contributing](#contributing)  
-7. [Tests](#tests)  
-8. [License](#license)
+3. [Usage](#usage)  
+4. [Questions](#questions)  
+5. [Contributing](#contributing)  
+6. [Tests](#tests)  
+7. [License](#license)
 ## Installation  
 
 1. Download. 
 2. Login to your **mysql** shell and run schema.sql. Optionally, you may also run the seeds.sql.
 3. Create a .env file in the root and enter the following information:
-    ```DB_NAME=employees_db  
-    DB_USERNAME="YOUR_MYSQL_USERNAME_GOES_HERE" (default is root)  
-    DB_PASSWORD="YOUR_MYSQL_PASSWORD_GOES_HERE"  
-    ```
+```
+DB_NAME=employees_db  
+DB_USERNAME="YOUR_MYSQL_USERNAME_GOES_HERE" (default is root)  
+DB_PASSWORD="YOUR_MYSQL_PASSWORD_GOES_HERE"  
+```
 4. Run ```npm i``` from the terminal while in the folder location. 
 5. Enter the command ```node index.js```.  
 
-## Dependencies
-
-- [console.table@0.10.0]()
-- [dotenv@16.0.1]()
-- [inquirer@8.2.4]()
-- [mysql2@2.3.3]()
-
 ## Usage  
 
-**[Walkthrough Video](https://drive.google.com/file/d/1QaviwklVCTNazefBhnmVNIgdwy2Qhaf4/view?usp=sharing)**
+**[Walkthrough Video](placeholder)**
 
-![App Screenshot](./Assets/images/SS1.png) 
+![App Screenshot](./assets/images/SS1.png) 
 
-![App Screenshot](./Assets/images/SS2.png) 
+![App Screenshot](./assets/images/SS2.png) 
+
+![App Screenshot](./assets/images/SS3.png) 
 
 ## Contributing  
 
@@ -75,7 +70,7 @@ Follow best practices for naming conventions, indentation, quality comments, etc
 
 ## Tests  
 
-The program uses Jest for testing. There are pre-built tests inculded in the repository. If you would like to adjust the test, adjust the global variables to whatever you desire to test, then ```npm run test```  
+A seeds.sql file is included for testing purposes. These examples are fictitious and any similarity to actual persons, living or dead, is entirely coincidental.
 
 ## Questions  
 
@@ -87,12 +82,3 @@ If you have any questions, please reach out to me either on Github or by Email.
 
 - [MIT](https://opensource.org/licenses/MIT)
 
-* Update employee managers.
-
-* View employees by manager.
-
-* View employees by department.
-
-* Delete departments, roles, and employees.
-
-* View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.
