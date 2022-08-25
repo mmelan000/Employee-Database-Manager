@@ -6,6 +6,38 @@ const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
 
+function budgetByDepartment() {
+    console.clear();
+    db.promise().query(`SELECT
+                            department.name AS 'Department',
+                            SUM(role.salary) AS 'Budget' 
+                        FROM role 
+                        LEFT JOIN department on role.department_id = department.id
+                        LEFT JOIN employee on employee.role_id = role.id
+                        GROUP BY department_id`)
+        .then((response) => {
+            if (ugly) {
+                console.table(response[0]);
+                rootMenu();
+                return;
+            } else {
+                console.log(`
+╔═════════════╦════════════════════╗
+║ Department  ║ Total Budget Spend ║
+╠═════════════╬════════════════════╣`);
+
+            for (var i = 0; i < response[0].length; i++) {
+                console.log(`║ ${response[0][i].Department}`.padEnd(14) + `║ ${response[0][i].Budget}`.padEnd(21) + `║`);
+            }
+            console.log(`╚═════════════╩════════════════════╝`);
+            rootMenu();
+            return;
+
+            }
+        })
+
+}
+
 function deleteEmployee() {
     console.clear();
     db.promise().query(`SELECT 
@@ -550,6 +582,7 @@ function rootMenu() {
                     `Delete a department.`,
                     `Delete an employee.`,
                     `Delete a role.`,
+                    `View Total Budget Spend.`,
                     `Toggle table mode.`,
                     `Exit.`
                 ],
@@ -589,6 +622,9 @@ function rootMenu() {
                     break;
                 case `Delete a role.`:
                     deleteRole();
+                    break;
+                case `View Total Budget Spend.`:
+                    budgetByDepartment();
                     break;
                 case `Toggle table mode.`:
                     toggleTables();
