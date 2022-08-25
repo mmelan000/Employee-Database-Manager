@@ -1,11 +1,9 @@
 const inquirer = require('inquirer');
 const db = require('./config/connections.js');
 const cTable = require('console.table');
-const console = require('console');
-const { clear } = require('console');
 const { exit } = require('process');
 let ugly = false;
-
+// renders table that shows current salary spending by department
 function budgetByDepartment() {
     console.clear();
     db.promise().query(`SELECT
@@ -37,7 +35,7 @@ function budgetByDepartment() {
         })
 
 }
-
+// prompts list of available employees to delete as well as an option to cancel
 function deleteEmployee() {
     console.clear();
     db.promise().query(`SELECT 
@@ -68,7 +66,7 @@ function deleteEmployee() {
     })
 return;
 }
-
+// prompts list of available roles to delete as well as an option to cancel
 function deleteRole() {
     console.clear();
     db.promise().query(`SELECT 
@@ -98,7 +96,7 @@ function deleteRole() {
     })
     return;
 }
-
+// prompts list of available departments to delete as well as an option to cancel
 function deleteDepartment() {
     console.clear();
     db.promise().query(`SELECT 
@@ -128,10 +126,8 @@ function deleteDepartment() {
     })
     return;
 }
-
+// clears console, renders employee table based off of table view and sort criteria, redirects back to rootMenu
 function renderEmployeeTable(sortBy, ascDesc) {
-    console.log(sortBy);
-    console.log(ascDesc);
     if (!sortBy) {sortBy = 'e.id'; ascDesc = `ASC`};
     if (ugly) {
         console.clear();
@@ -186,7 +182,7 @@ function renderEmployeeTable(sortBy, ascDesc) {
             })
     }
 }
-
+// allows user to update existing employee's manager to different exisiting employee or null manager.
 function updateEmployeeManager() {
     console.clear();
     db.promise().query(`SELECT 
@@ -231,7 +227,7 @@ function updateEmployeeManager() {
     })
     return;
 }
-
+// allows user to update existing employee with a new existing role.
 function updateEmployeeRole() {
     console.clear();
     db.promise().query(`SELECT 
@@ -240,14 +236,12 @@ function updateEmployeeRole() {
                             employee.id AS short
                         FROM employee`)
     .then((employeeQuery) => {
-        console.log('line17');
         db.promise().query(`SELECT 
                                 role.title as name, 
                                 role.id as value, 
                                 role.id as short 
                             FROM role`)
         .then((roleQuery) => {
-            console.log('line24');
             inquirer
                 .prompt([
                     {
@@ -276,7 +270,7 @@ function updateEmployeeRole() {
     })
     return;
 }
-
+// asks first name, last name, parent role, and manager. then ships it off the mysql, continues on to render table to confirm for user it was successful
 function addEmployee() {
     console.clear();
     db.promise().query(`SELECT 
@@ -348,7 +342,7 @@ function addEmployee() {
     })
     return;
 }
-
+// asks name, salary, and parent department. then ships it off the mysql, continues on to render table to confirm for user it was successful
 function addRole() {
     console.clear();
     db.promise().query(`SELECT 
@@ -404,7 +398,7 @@ function addRole() {
             return;
         })
 }
-
+// asks name of department, ships it off the mysql, continues on to render table to confirm for user it was successful
 function addDepartment() {
     console.clear();
     inquirer
@@ -432,7 +426,7 @@ function addDepartment() {
             })
         });
 }
-
+// menu to sort employee table by different criteria
 function viewEmployees() {
     inquirer
         .prompt([
@@ -479,7 +473,7 @@ function viewEmployees() {
 
 
 }
-
+// clears console, renders role table based off of table view, redirects back to rootMenu
 function viewRoles() {
     if (ugly) {
         console.clear();
@@ -519,7 +513,7 @@ function viewRoles() {
         })
     }
 }
-
+// clears console, renders department table base off of table view, redirects back to rootMenu
 function viewDepartments() {
     if (ugly) {
         console.clear();
@@ -550,7 +544,7 @@ function viewDepartments() {
         })
     }
 }
-
+// i dont like console.table, so i made my own and put this in so i could meet my projects AC
 function toggleTables() {
     if (ugly) {
         ugly = false;
@@ -562,7 +556,7 @@ function toggleTables() {
     rootMenu();
     return;
 }
-
+// core list menu that directs to differnet app functionalites
 function rootMenu() {
     inquirer
         .prompt([
@@ -634,7 +628,7 @@ function rootMenu() {
             }
         })
 }
-
+// loads pointless header, moves onto rootMenu
 function init() {
     console.clear();
     const unnecessary = ["",

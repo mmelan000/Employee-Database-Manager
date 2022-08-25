@@ -3,7 +3,7 @@
 
 ## Description  
 
-The purpose of this is to create a program which allows employers to create an easy to use database to track internal data about its employees.
+The purpose of this is to create a program which allows employers to create an easy to use database to track internal data about their employees.
 
 **User Story**
 ```
