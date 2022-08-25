@@ -48,8 +48,8 @@ THEN I am prompted to select an employee to update and their new role and this i
 3. Create a .env file in the root and enter the following information:
 ```
 DB_NAME=employees_db  
-DB_USERNAME="YOUR_MYSQL_USERNAME_GOES_HERE" (default is root)  
-DB_PASSWORD="YOUR_MYSQL_PASSWORD_GOES_HERE"  
+DB_USERNAME=YOUR_MYSQL_USERNAME_GOES_HERE (default is root)  
+DB_PASSWORD=YOUR_MYSQL_PASSWORD_GOES_HERE  
 ```
 4. Run ```npm i``` from the terminal while in the folder location. 
 5. Enter the command ```node index.js```.  

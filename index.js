@@ -9,9 +9,9 @@ function budgetByDepartment() {
     db.promise().query(`SELECT
                             department.name AS 'Department',
                             SUM(role.salary) AS 'Budget' 
-                        FROM role 
+                        FROM employee 
+                        LEFT JOIN role on employee.role_id = role.id
                         LEFT JOIN department on role.department_id = department.id
-                        LEFT JOIN employee on employee.role_id = role.id
                         GROUP BY department_id`)
         .then((response) => {
             if (ugly) {
