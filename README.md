@@ -37,9 +37,9 @@ THEN I am prompted to select an employee to update and their new role and this i
 1. [Description](#description)  
 2. [Installation](#installation)  
 3. [Usage](#usage)  
-4. [Questions](#questions)  
-5. [Contributing](#contributing)  
-6. [Tests](#tests)  
+4. [Contributing](#contributing)  
+5. [Tests](#tests)  
+6. [Questions](#questions)  
 7. [License](#license)
 ## Installation  
 
